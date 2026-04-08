@@ -1,0 +1,66 @@
+Created by PLY version 3.11 (http://www.dabeaz.com/ply)
+
+Grammar
+
+Rule 0     S' -> program
+Rule 1     program -> statement
+Rule 2     program -> program statement
+Rule 3     statement -> LINE
+
+Terminals, with rules where they appear
+
+LINE                 : 3
+error                : 
+
+Nonterminals, with rules where they appear
+
+program              : 2 0
+statement            : 1 2
+
+Parsing method: LALR
+
+state 0
+
+    (0) S' -> . program
+    (1) program -> . statement
+    (2) program -> . program statement
+    (3) statement -> . LINE
+
+    LINE            shift and go to state 3
+
+    program                        shift and go to state 1
+    statement                      shift and go to state 2
+
+state 1
+
+    (0) S' -> program .
+    (2) program -> program . statement
+    (3) statement -> . LINE
+
+    LINE            shift and go to state 3
+
+    statement                      shift and go to state 4
+
+state 2
+
+    (1) program -> statement .
+
+    LINE            reduce using rule 1 (program -> statement .)
+    $end            reduce using rule 1 (program -> statement .)
+
+
+state 3
+
+    (3) statement -> LINE .
+
+    LINE            reduce using rule 3 (statement -> LINE .)
+    $end            reduce using rule 3 (statement -> LINE .)
+
+
+state 4
+
+    (2) program -> program statement .
+
+    LINE            reduce using rule 2 (program -> program statement .)
+    $end            reduce using rule 2 (program -> program statement .)
+
