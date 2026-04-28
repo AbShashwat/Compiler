@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>NL to HTML Converter</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: #0f172a;
+      color: #e5e7eb;
+    }
+
+    header {
+      background: #020617;
+      padding: 20px;
+      text-align: center;
+      border-bottom: 2px solid cyan;
+    }
+
+    header h1 {
+      margin: 0;
+      color: cyan;
+      font-size: 32px;
+    }
+
+    header p {
+      margin-top: 8px;
+      color: #94a3b8;
+    }
+
+    main {
+      padding: 40px 0;
+    }
+
+    .container {
+      width: 70%;
+      margin: auto;
+      text-align: center;
+    }
+
+    textarea {
+      width: 100%;
+      height: 260px;
+      padding: 15px;
+      font-size: 16px;
+      border-radius: 10px;
+      border: none;
+      outline: none;
+      resize: none;
+      box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
+    }
+
+    .compile-btn {
+      margin-top: 20px;
+      padding: 14px 36px;
+      font-size: 18px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      background: cyan;
+      color: black;
+      font-weight: bold;
+    }
+
+    .compile-btn:disabled {
+      background: gray;
+      cursor: not-allowed;
+    }
+
+    .downloads {
+      margin-top: 30px;
+    }
+
+    .download-btn {
+      margin: 12px;
+      padding: 14px 28px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      background: #22c55e;
+      color: black;
+      font-weight: bold;
+    }
+
+    .status {
+      margin-top: 20px;
+      font-style: italic;
+    }
+
+    #errorBox {
+      margin-top: 15px;
+      padding: 12px;
+      background: #1e293b;
+      border-left: 5px solid red;
+      display: none;
+      text-align: left;
+      white-space: pre-wrap;
+    }
+
+    footer {
+      margin-top: 50px;
+      padding: 15px;
+      text-align: center;
+      background: #020617;
+      color: #64748b;
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <h1>NL → HTML Converter</h1>
+  <p>Natural Language → Markdown + HTML Compiler</p>
+</header>
+
+<main>
+  <div class="container">
+
+    <textarea id="input" placeholder="Type natural language instructions here..."></textarea>
+
+    <br>
+    <button class="compile-btn" onclick="compileCode()">Compile</button>
+
+    <div class="status" id="status"></div>
+
+    <div id="errorBox"></div>
+
+    <section class="downloads">
+      <button class="download-btn" onclick="downloadMD()">
+        Download Markdown (.md)
+      </button>
+
+      <button class="download-btn" onclick="downloadHTML()">
+        Download HTML (.html)
+      </button>
+    </section>
+
+  </div>
+</main>
+
+<footer>
+  Compiler Design Project • NL to HTML Converter
+</footer>
+
+<script>
+function compileCode() {
+  const text = document.getElementById("input").value;
+  const status = document.getElementById("status");
+  const errorBox = document.getElementById("errorBox");
+  const btn = document.querySelector(".compile-btn");
+
+  // Reset UI
+  errorBox.style.display = "none";
+  errorBox.innerText = "";
+
+  if (text.trim() === "") {
+    status.innerText = "Please enter some input first.";
+    status.style.color = "orange";
+    return;
+  }
+
+  status.innerText = "Compiling...";
+  status.style.color = "yellow";
+  btn.disabled = true;
+
+  fetch("http://127.0.0.1:5000/compile", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ input: text })
+  })
+  .then(async (response) => {
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Compilation failed");
+    }
+
+    return data;
+  })
+  .then(data => {
+    status.innerText = "Compilation successful! Download files below.";
+    status.style.color = "lightgreen";
+  })
+  .catch(error => {
+    status.innerText = "Compilation failed!";
+    status.style.color = "red";
+
+    errorBox.style.display = "block";
+    errorBox.innerText = "Error Details:\n" + error.message;
+  })
+  .finally(() => {
+    btn.disabled = false;
+  });
+}
+
+function downloadMD() {
+  window.location.href = "http://127.0.0.1:5000/download/md";
+}
+
+function downloadHTML() {
+  window.location.href = "http://127.0.0.1:5000/download/html";
+}
+</script>
+
+</body>
+</html>
